@@ -7,6 +7,5 @@ import lombok.Data;
  */
 @Data
 public class Event {
-    private String key;
-    private String type;
+    private Object obj;
 }

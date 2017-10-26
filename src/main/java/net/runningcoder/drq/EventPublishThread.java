@@ -2,20 +2,20 @@ package net.runningcoder.drq;
 
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import net.runningcoder.drq.queue.EventQueue;
 
 /**
  * Created by machine on 2017/10/22.
  */
+@Slf4j
 @Data
 public class EventPublishThread extends Thread {
-    private String eventType;
     private EventQueue eventQueue;
     private Disruptor<Event> disruptor;
     private boolean running;
 
-    public EventPublishThread(String eventType, EventQueue eventQueue, Disruptor<Event> disruptor) {
-        this.eventType = eventType;
+    public EventPublishThread(EventQueue eventQueue, Disruptor<Event> disruptor) {
         this.eventQueue = eventQueue;
         this.disruptor = disruptor;
         this.running = true;
@@ -23,19 +23,9 @@ public class EventPublishThread extends Thread {
 
     public void run() {
         while (running) {
-            String nextKey = null;
-            try {
-                if (nextKey == null) {
-                    nextKey = eventQueue.next();
-                }
-                if (nextKey != null) {
-                    disruptor.publishEvent((event, sequence, key, eventType) -> {
-                        event.setKey(key);
-                        event.setType(eventType);
-                    }, nextKey, eventType);
-                }
-            } catch (Exception e) {
-//                log.error(nextKey, e);
+            Object next = eventQueue.next();
+            if (next != null) {
+                disruptor.publishEvent((event, sequence, value) -> event.setObj(value), next);
             }
         }
     }
