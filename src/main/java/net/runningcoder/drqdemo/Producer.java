@@ -20,7 +20,7 @@ public class Producer {
     @Autowired
     private EventQueue<String> eventQueue;
 
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 5000)
     public void send() {
         String str = "num-" + (++i);
         eventQueue.enqueueToBack(str);
